@@ -16,7 +16,7 @@ public class SlashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    sleep(1);
+                    sleep(1000);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();

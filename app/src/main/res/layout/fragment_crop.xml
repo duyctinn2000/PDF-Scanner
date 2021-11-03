@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_crop"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@color/edit"
+        android:minHeight="?android:attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:theme="@style/Theme.Edit">
+
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Crop"
+            android:textSize="20sp"
+            android:textColor="@color/white"/>
+
+        <Button
+            android:id="@+id/crop_back"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_gravity="left"
+            android:background="@drawable/ic_back_foreground"/>
+
+        <Button
+            android:id="@+id/crop_forward"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_gravity="right"
+            android:background="@drawable/ic_forward_foreground"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/image_crop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@mipmap/ic_empty_foreground"
+        app:layout_constraintBottom_toTopOf="@+id/menu_crop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_crop" />
+
+    <RelativeLayout
+        android:id="@+id/menu_crop"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/edit">
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="60dp"
+            android:background="@drawable/ic_delete_foreground"
+            />
+        <Button
+            android:id="@+id/cropButton"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginEnd="60dp"
+            android:background="@drawable/ic_crop_foreground"
+          android:layout_alignParentEnd="true"
+            />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,12 +5,18 @@
       <map>
         <entry key="app/src/main/res/drawable/ic_camera_foreground.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_cameraa_foreground.xml" value="0.18802083333333333" />
+        <entry key="app/src/main/res/drawable/ic_crop_foreground.xml" value="0.18802083333333333" />
+        <entry key="app/src/main/res/drawable/ic_delete_foreground.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_gallery_background.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_gallery_foreground.xml" value="0.18802083333333333" />
+        <entry key="app/src/main/res/layout/activity_edit.xml" value="0.171875" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.15137271518641301" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.31666666666666665" />
-        <entry key="app/src/main/res/layout/fragment_empty.xml" value="0.31666666666666665" />
+        <entry key="app/src/main/res/layout/fragment_crop.xml" value="0.171875" />
+        <entry key="app/src/main/res/layout/fragment_edit.xml" value="0.171875" />
+        <entry key="app/src/main/res/layout/fragment_empty.xml" value="0.2936003770848353" />
         <entry key="app/src/main/res/layout/fragment_file.xml" value="0.31666666666666665" />
+        <entry key="app/src/main/res/menu/menu_crop.xml" value="0.4102381189667542" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/xml/files.xml" value="0.31666666666666665" />

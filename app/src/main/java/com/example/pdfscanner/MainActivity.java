@@ -6,14 +6,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
-import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -23,23 +19,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import com.example.pdfscanner.formdetector.FormDetector;
 
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,19 +35,14 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String fileName = "output.jpg";
 
-
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+
     private static final String TAG = "MainActivity";
-
-    private ImageView imageView;
-
-    private FormDetector formDetector;
-
 
     static {
         if (OpenCVLoader.initDebug()) {
@@ -75,10 +56,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String imgPath;
 
-    private Bitmap rgbFrameBitmap;
-
-
     private Button galleryButton, cameraButton;
+
+    public static FormDetector formDetector;
 
     public static void verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
@@ -94,65 +74,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Bitmap perspectiveTransform(Bitmap inputBitmap, Point topLeft, Point topRight, Point bottomRight, Point bottomLeft) {
-
-        int resultWidth = (int)(topRight.x-topLeft.x);
-        int bottomWidth = (int)(bottomRight.x - bottomLeft.x);
-        if(bottomWidth > resultWidth)
-            resultWidth = bottomWidth;
-
-        int resultHeight = (int)(bottomLeft.y - topLeft.y);
-        int bottomHeight = (int)(bottomRight.y - topRight.y);
-        if(bottomHeight > resultHeight)
-            resultHeight = bottomHeight;
-
-        Mat inputMat = new Mat(inputBitmap.getWidth(), inputBitmap.getHeight(), CvType.CV_8UC1);
-        Utils.bitmapToMat(inputBitmap, inputMat);
-        Mat outputMat = new Mat(resultWidth, resultHeight, CvType.CV_8UC1);
-
-        List<Point> source = new ArrayList<Point>();
-        source.add(topLeft);
-        source.add(topRight);
-        source.add(bottomLeft);
-        source.add(bottomRight);
-
-        Mat startM = Converters.vector_Point2f_to_Mat(source);
-
-        Point ocvPOut1 = new Point(0, 0);
-        Point ocvPOut2 = new Point(resultWidth, 0);
-        Point ocvPOut3 = new Point(0, resultHeight);
-        Point ocvPOut4 = new Point(resultWidth, resultHeight);
-        List<Point> dest = new ArrayList<Point>();
-        dest.add(ocvPOut1);
-        dest.add(ocvPOut2);
-        dest.add(ocvPOut3);
-        dest.add(ocvPOut4);
-        Mat endM = Converters.vector_Point2f_to_Mat(dest);
-
-        Mat perspectiveTransform = Imgproc.getPerspectiveTransform(startM, endM);
-
-        Imgproc.warpPerspective(inputMat,
-                outputMat,
-                perspectiveTransform,
-                new Size(resultWidth, resultHeight));
-        Bitmap output = Bitmap.createBitmap(resultWidth, resultHeight, Bitmap.Config.RGB_565);
-        Utils.matToBitmap(outputMat, output);
-        return output;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        galleryButton = findViewById(R.id.galleryButton);
-        cameraButton = findViewById(R.id.cameraButton);
-        imageView = findViewById(R.id.mainImage);
-
         try {
             formDetector = new FormDetector(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        verifyStoragePermissions(MainActivity.this);
+        galleryButton = findViewById(R.id.galleryButton);
+        cameraButton = findViewById(R.id.cameraButton);
 
         mFile = getPhotoFile();
 
@@ -160,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
 
         galleryButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                verifyStoragePermissions(MainActivity.this);
                 startActivityForResult(selectImage, REQUEST_IMAGE_SELECT);
             }
         });
@@ -169,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
 
         cameraButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                verifyStoragePermissions(MainActivity.this);
                 Uri uri = FileProvider.getUriForFile(MainActivity.this,
                         "com.example.pdfscanner.fileprovider",
                         mFile);
@@ -206,51 +137,13 @@ public class MainActivity extends AppCompatActivity {
                 imgPath = cursor.getString(columnIndex);
                 cursor.close();
             }
-            rgbFrameBitmap = BitmapFactory.decodeFile(imgPath);
 
-            ExifInterface ei = null;
-            try {
-                ei = new ExifInterface(imgPath);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (imgPath!=null) {
+            Intent intent = EditActivity.newIntent(MainActivity.this,imgPath);
+            startActivity(intent);
             }
-
-            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-
-            switch(orientation) {
-
-                case ExifInterface.ORIENTATION_ROTATE_90:
-
-                    this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 90);
-                    break;
-
-                case ExifInterface.ORIENTATION_ROTATE_180:
-
-                    this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 180);
-                    break;
-
-                case ExifInterface.ORIENTATION_ROTATE_270:
-
-                    this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 270);
-                    break;
-
-            }
-            Point[] point = formDetector.detector(this.rgbFrameBitmap);
-            Log.i("13123123",point.toString());
-            this.rgbFrameBitmap = this.perspectiveTransform(this.rgbFrameBitmap,point[0],point[1],point[2],point[3]);
-            imageView.setImageBitmap(this.rgbFrameBitmap);
-        } else {
-            cameraButton.setEnabled(true);
-            galleryButton.setEnabled(true);
         }
-
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
     public File getPhotoFile() {

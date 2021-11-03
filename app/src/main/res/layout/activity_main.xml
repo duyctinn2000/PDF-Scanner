@@ -13,13 +13,6 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/menu">
 
-        <ImageView
-            android:id="@+id/mainImage"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:layout_gravity="center"/>
-
-
     </FrameLayout>
 
 
@@ -27,30 +20,30 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:background="@color/white"
         android:layout_alignParentBottom="true">
 
         <Button
             android:id="@+id/galleryButton"
             style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="50dp"
             android:background="@drawable/ic_gallery_foreground"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <Button
             android:id="@+id/cameraButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="50dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="50dp"
             android:background="@drawable/ic_camera_foreground"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

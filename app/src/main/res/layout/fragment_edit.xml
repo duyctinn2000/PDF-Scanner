@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_crop"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@color/edit"
+        android:minHeight="?android:attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:theme="@style/Theme.Edit">
+
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Edit Page"
+            android:textSize="20sp"
+            android:textColor="@color/white"/>
+
+        <Button
+            android:id="@+id/edit_back"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_gravity="left"
+            android:background="@drawable/ic_back_foreground"/>
+
+        <Button
+            android:id="@+id/edit_check"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_gravity="right"
+            android:background="@drawable/ic_check_foreground"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/image_edit"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@mipmap/ic_empty_foreground"
+        app:layout_constraintBottom_toTopOf="@+id/menu_edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_crop" />
+
+    <RelativeLayout
+        android:id="@+id/menu_edit"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/edit">
+        <Button
+            android:id="@+id/rotateButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="30dp"
+            android:background="@drawable/ic_rotate_foreground"
+            />
+        <Button
+            android:id="@+id/filterButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="60dp"
+            android:background="@drawable/ic_filter_foreground"
+            android:layout_centerInParent="true"
+            />
+        <Button
+            android:id="@+id/adjustButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="30dp"
+            android:background="@drawable/ic_adjust_foreground"
+            android:layout_alignParentEnd="true"
+            />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
