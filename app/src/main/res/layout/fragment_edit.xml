@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_crop"
+        android:id="@+id/toolbar_edit"
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:background="@color/edit"
@@ -48,7 +48,6 @@
         android:id="@+id/image_edit"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:src="@mipmap/ic_empty_foreground"
         app:layout_constraintBottom_toTopOf="@+id/menu_edit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

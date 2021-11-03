@@ -31,7 +31,7 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="41dp"
             android:layout_height="41dp"
-            android:layout_gravity="left"
+            android:layout_gravity="start"
             android:background="@drawable/ic_back_foreground"/>
 
         <Button
@@ -39,7 +39,8 @@
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="41dp"
             android:layout_height="41dp"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/ic_forward_foreground"/>
 
     </androidx.appcompat.widget.Toolbar>
@@ -48,7 +49,6 @@
         android:id="@+id/image_crop"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:src="@mipmap/ic_empty_foreground"
         app:layout_constraintBottom_toTopOf="@+id/menu_crop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
