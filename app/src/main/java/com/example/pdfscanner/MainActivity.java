@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             fm.beginTransaction().add(R.id.fragment_container,fragment).commit();
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 

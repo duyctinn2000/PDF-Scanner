@@ -1,19 +1,13 @@
 package com.example.pdfscanner;
 
-import static com.example.pdfscanner.MainActivity.formDetector;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.PointF;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +23,8 @@ import androidx.fragment.app.Fragment;
 
 import androidx.exifinterface.media.ExifInterface;
 
+import com.example.pdfscanner.formdetector.FormDetector;
+
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -40,7 +36,6 @@ import org.opencv.utils.Converters;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class CropFragment extends Fragment {
@@ -56,6 +51,7 @@ public class CropFragment extends Fragment {
     private Dialog deleteDialog;
     private Point[] cropPoint;
     private boolean isAutoCrop = true;
+    private DataSingleton dataSingleton;
 
 
     public static CropFragment newInstance(String imgPath) {
@@ -69,6 +65,9 @@ public class CropFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        dataSingleton = DataSingleton.newDataSingleton(getActivity());
+
         sourcePath = getArguments().getString(SOURCE_IMAGE);
 
         rgbFrameBitmap = BitmapFactory.decodeFile(sourcePath);
@@ -80,38 +79,50 @@ public class CropFragment extends Fragment {
             e.printStackTrace();
         }
 
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+        if (ei != null) {
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
-        switch(orientation) {
+            switch (orientation) {
 
-            case ExifInterface.ORIENTATION_ROTATE_90:
+                case ExifInterface.ORIENTATION_ROTATE_90:
 
-                this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 90);
-                break;
+                    this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 90);
+                    break;
 
-            case ExifInterface.ORIENTATION_ROTATE_180:
+                case ExifInterface.ORIENTATION_ROTATE_180:
 
-                this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 180);
-                break;
+                    this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 180);
+                    break;
 
-            case ExifInterface.ORIENTATION_ROTATE_270:
+                case ExifInterface.ORIENTATION_ROTATE_270:
 
-                this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 270);
-                break;
+                    this.rgbFrameBitmap = rotateImage(rgbFrameBitmap, 270);
+                    break;
 
+            }
         }
+        dataSingleton.getData().setOriginalBitmap(rgbFrameBitmap);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crop,container,false);
+
+        if (this.rgbFrameBitmap==null) {
+            dataSingleton = DataSingleton.get(getActivity());
+            Bitmap tempBitmap = dataSingleton.getData().getOriginalBitmap();
+            if (tempBitmap != null) {
+                this.rgbFrameBitmap = tempBitmap.copy(tempBitmap.getConfig(), true);
+            }
+        }
+
         deleteButton = v.findViewById(R.id.deleteButton);
         cropButton = v.findViewById(R.id.cropButton);
         backButton = v.findViewById(R.id.crop_back);
         forwardButton = v.findViewById(R.id.crop_forward);
         cropImage = v.findViewById(R.id.image_crop);
-        polygonView = (PolygonView) v.findViewById(R.id.polygonView);
+        polygonView = v.findViewById(R.id.polygonView);
         sourceFrame = v.findViewById(R.id.sourceFrame);
         deleteDialog = new Dialog(getActivity());
         deleteDialog.setContentView(R.layout.dialog_delete);
@@ -169,47 +180,71 @@ public class CropFragment extends Fragment {
                     polygonView.setFullImgCrop();
                 } else {
                     isAutoCrop = true;
-                    cropTextView.setText("All");
+                    cropTextView.setText("Full");
+                    cropPoint = FormDetector.detector(rgbFrameBitmap);
                     polygonView.setCropPoints(cropPoint);
                 }
-
             }
         });
-
 
         forwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Point[] points = polygonView.getPoints();
+                rgbFrameBitmap = null;
                 if (points!=null) {
-                    cropResult = perspectiveTransform(rgbFrameBitmap, points[0], points[1], points[2], points[3]);
-                    cropImage.setImageBitmap(cropResult);
+                    dataSingleton.getData().setPoints(points);
+                    cropResult = perspectiveTransform(dataSingleton.getData().getOriginalBitmap(), points[0], points[1], points[2], points[3]);
+                    dataSingleton.getData().setCropBitmap(cropResult);
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.edit_container, EditFragment.newInstance(), "EDIT_FRAGMENT")
+                            .addToBackStack(null)
+                            .commit();
                 }
             }
         });
-
-
         return v;
     }
 
     private void setBitmap(Bitmap original) {
-        this.rgbFrameBitmap = scaledBitmap(original, sourceFrame.getWidth(), sourceFrame.getHeight());
+        this.rgbFrameBitmap = getResizedBitmap(original, sourceFrame.getWidth(), sourceFrame.getHeight());
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(rgbFrameBitmap.getWidth(),rgbFrameBitmap.getHeight());
         layoutParams.gravity = Gravity.CENTER;
         polygonView.setLayoutParams(layoutParams);
         cropImage.setImageBitmap(rgbFrameBitmap);
-        this.cropPoint = formDetector.detector(rgbFrameBitmap);
+        this.cropPoint = dataSingleton.getData().getPoints();
+        if (this.cropPoint==null) {
+            this.cropPoint = FormDetector.detector(rgbFrameBitmap);
+        }
         polygonView.setCropPoints(this.cropPoint);
         polygonView.setVisibility(View.VISIBLE);
     }
 
-    private Bitmap scaledBitmap(Bitmap bitmap, int width, int height) {
-        Matrix m = new Matrix();
-        m.setRectToRect(new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight()), new RectF(0, 0, width, height), Matrix.ScaleToFit.CENTER);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        float scale = Math.min(scaleHeight,scaleWidth);
+        dataSingleton.getData().setScale(1/scale);
+
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scale, scale);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
+        bm.recycle();
+        return resizedBitmap;
     }
 
     private Bitmap perspectiveTransform(Bitmap inputBitmap, Point topLeft, Point topRight, Point bottomRight, Point bottomLeft) {
+        float scale = dataSingleton.getData().getScale();
+        topLeft = new Point(topLeft.x*scale,topLeft.y*scale);
+        topRight = new Point(topRight.x*scale,topRight.y*scale);
+        bottomLeft = new Point(bottomLeft.x*scale,bottomLeft.y*scale);
+        bottomRight = new Point(bottomRight.x*scale,bottomRight.y*scale);
 
         Mat inputMat = new Mat(inputBitmap.getWidth(), inputBitmap.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(inputBitmap, inputMat);
@@ -256,8 +291,5 @@ public class CropFragment extends Fragment {
     private double getPointsDistance(Point p1, Point p2) {
         return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.x - p2.y, 2));
     }
-
-
-
 
 }

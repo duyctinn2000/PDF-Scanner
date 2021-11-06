@@ -20,6 +20,8 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2746246634401579" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.31666666666666665" />
         <entry key="app/src/main/res/layout/dialog_delete.xml" value="0.19384126501036425" />
+        <entry key="app/src/main/res/layout/dialog_save.xml" value="0.17865182996247816" />
+        <entry key="app/src/main/res/layout/dialog_savew.xml" value="0.31666666666666665" />
         <entry key="app/src/main/res/layout/fragment_crop.xml" value="0.2393501963459587" />
         <entry key="app/src/main/res/layout/fragment_edit.xml" value="0.171875" />
         <entry key="app/src/main/res/layout/fragment_empty.xml" value="0.2936003770848353" />
