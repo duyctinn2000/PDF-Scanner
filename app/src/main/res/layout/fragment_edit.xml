@@ -45,13 +45,22 @@
     </androidx.appcompat.widget.Toolbar>
 
     <ImageView
+        android:layout_margin="10dp"
         android:id="@+id/image_edit"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/menu_edit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_crop" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_edit"
+        app:layout_constraintBottom_toTopOf="@+id/edit_view"/>
+
+    <View
+        android:id="@+id/edit_view"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/menu_edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <RelativeLayout
         android:id="@+id/menu_edit"

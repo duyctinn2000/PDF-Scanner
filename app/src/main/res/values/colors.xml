@@ -11,4 +11,6 @@
     <color name="primary_dark">#2C4DCF</color>
     <color name="edit">#272643</color>
     <color name="edit_dark">#423F6E</color>
+    <color name="point_true">#2FE910</color>
+    <color name="point_false">#D80E0E</color>
 </resources>

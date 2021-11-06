@@ -77,11 +77,16 @@ public class FormDetector {
 
 
                 if (contours.size() > 0) {
-                    contours.sort(new Comparator<MatOfPoint>() {
-                        public int compare(MatOfPoint c1, MatOfPoint c2) {
-                            return (int) (Imgproc.contourArea(c2)-Imgproc.contourArea(c1));
-                        }
-                    });
+                    try {
+                        contours.sort(new Comparator<MatOfPoint>() {
+                            public int compare(MatOfPoint c1, MatOfPoint c2) {
+                                return (int) (Imgproc.contourArea(c2)-Imgproc.contourArea(c1));
+                            }
+                        });
+                    }
+                    catch (Exception e){
+                        continue;
+                    }
 
                     MatOfPoint contour = contours.get(0); //the largest is at the index 0 for starting point
 

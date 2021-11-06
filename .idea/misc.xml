@@ -3,16 +3,24 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../layout/custom_preview.xml" value="1.0463680157107969" />
+        <entry key="app/src/main/res/drawable/dialog_bg.xml" value="0.18802083333333333" />
+        <entry key="app/src/main/res/drawable/dialog_bg_2.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_camera_foreground.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_cameraa_foreground.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_crop_foreground.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_delete_foreground.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_gallery_background.xml" value="0.18802083333333333" />
         <entry key="app/src/main/res/drawable/ic_gallery_foreground.xml" value="0.18802083333333333" />
+        <entry key="app/src/main/res/drawable/ic_point_background.xml" value="0.18802083333333333" />
+        <entry key="app/src/main/res/drawable/ic_point_foreground.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_rotate_background.xml" value="0.2722222222222222" />
+        <entry key="app/src/main/res/drawable/ic_rotate_foreground.xml" value="0.2722222222222222" />
         <entry key="app/src/main/res/layout/activity_edit.xml" value="0.171875" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2746246634401579" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.31666666666666665" />
-        <entry key="app/src/main/res/layout/fragment_crop.xml" value="0.171875" />
+        <entry key="app/src/main/res/layout/dialog_delete.xml" value="0.19384126501036425" />
+        <entry key="app/src/main/res/layout/fragment_crop.xml" value="0.2393501963459587" />
         <entry key="app/src/main/res/layout/fragment_edit.xml" value="0.171875" />
         <entry key="app/src/main/res/layout/fragment_empty.xml" value="0.2936003770848353" />
         <entry key="app/src/main/res/layout/fragment_file.xml" value="0.31666666666666665" />
