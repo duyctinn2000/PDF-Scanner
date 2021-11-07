@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +54,7 @@ public class CropFragment extends Fragment {
     private Dialog deleteDialog;
     private Point[] cropPoint;
     private boolean isAutoCrop = true;
-    private DataSingleton dataSingleton;
+    private FormSingleton formSingleton;
     private float scale;
 
     public static CropFragment newInstance(String imgPath) {
@@ -70,7 +69,7 @@ public class CropFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        dataSingleton = DataSingleton.newDataSingleton(getActivity());
+        formSingleton = FormSingleton.newDataSingleton(getActivity());
 
         sourcePath = getArguments().getString(SOURCE_IMAGE);
 
@@ -105,7 +104,7 @@ public class CropFragment extends Fragment {
 
             }
         }
-        dataSingleton.getData().setOriginalBitmap(rgbFrameBitmap);
+        formSingleton.getForm().setOriginalBitmap(rgbFrameBitmap);
     }
 
     @Nullable
@@ -114,8 +113,8 @@ public class CropFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_crop,container,false);
 
         if (this.rgbFrameBitmap==null) {
-            dataSingleton = DataSingleton.get(getActivity());
-            Bitmap tempBitmap = dataSingleton.getData().getOriginalBitmap();
+            formSingleton = FormSingleton.get(getActivity());
+            Bitmap tempBitmap = formSingleton.getForm().getOriginalBitmap();
             if (tempBitmap != null) {
                 this.rgbFrameBitmap = tempBitmap.copy(tempBitmap.getConfig(), true);
             }
@@ -127,6 +126,7 @@ public class CropFragment extends Fragment {
         forwardButton = v.findViewById(R.id.crop_forward);
         cropImage = v.findViewById(R.id.image_crop);
         polygonView = v.findViewById(R.id.polygonView);
+        polygonView.setVisibility(View.GONE);
         sourceFrame = v.findViewById(R.id.sourceFrame);
         deleteDialog = new Dialog(getActivity());
         deleteDialog.setContentView(R.layout.dialog_delete);
@@ -197,8 +197,8 @@ public class CropFragment extends Fragment {
                 Point[] points = polygonView.getPoints();
                 rgbFrameBitmap = null;
                 if (points!=null) {
-                    cropResult = perspectiveTransform(dataSingleton.getData().getOriginalBitmap(), points[0], points[1], points[2], points[3]);
-                    dataSingleton.getData().setCropBitmap(cropResult);
+                    cropResult = perspectiveTransform(formSingleton.getForm().getOriginalBitmap(), points[0], points[1], points[2], points[3]);
+                    formSingleton.getForm().setCropBitmap(cropResult);
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .replace(R.id.edit_container, EditFragment.newInstance(), "EDIT_FRAGMENT")
                             .addToBackStack(null)
@@ -230,7 +230,7 @@ public class CropFragment extends Fragment {
         layoutParams.gravity = Gravity.CENTER;
         polygonView.setLayoutParams(layoutParams);
         cropImage.setImageBitmap(displayBitmap);
-        this.cropPoint = dataSingleton.getData().getPoints();
+        this.cropPoint = formSingleton.getForm().getPoints();
         if (this.cropPoint==null) {
             this.cropPoint = FormDetector.detector(rgbFrameBitmap);
         }
@@ -266,7 +266,7 @@ public class CropFragment extends Fragment {
         topRight = new Point(topRight.x/scale,topRight.y/scale);
         bottomLeft = new Point(bottomLeft.x/scale,bottomLeft.y/scale);
         bottomRight = new Point(bottomRight.x/scale,bottomRight.y/scale);
-        dataSingleton.getData().setPoints(new Point[]{topLeft,topRight,bottomRight,bottomLeft});
+        formSingleton.getForm().setPoints(new Point[]{topLeft,topRight,bottomRight,bottomLeft});
 
         Mat inputMat = new Mat(inputBitmap.getWidth(), inputBitmap.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(inputBitmap, inputMat);
@@ -313,4 +313,29 @@ public class CropFragment extends Fragment {
         return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (displayBitmap!=null) {
+            displayBitmap.recycle();
+            displayBitmap = null;
+        }
+        if (cropResult!=null) {
+            cropResult.recycle();
+            cropResult = null;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (formSingleton!=null) {
+            formSingleton.Recycle();
+            formSingleton = null;
+        }
+        if (rgbFrameBitmap!=null) {
+            rgbFrameBitmap.recycle();
+            rgbFrameBitmap = null;
+        }
+    }
 }

@@ -3,18 +3,15 @@ package com.example.pdfscanner;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,11 +23,13 @@ import java.util.Objects;
 
 public class EditFragment extends Fragment {
     private Button rotateButton, filterButton, backButton, checkButton, adjustButton, saveButton, cancelButton;
-    private ImageView editImage;
-    private Bitmap originalBitmap;
-    public Bitmap editBitmap;
+    private ImageView editImage, originalImage , grayImage, bwImage, smoothImage, magicImage;;
+    private Bitmap originalBitmap,cropBitmap, grayBitmap, bwBitmap, smoothBitmap, magicBitmap;
+    private Bitmap editBitmap;
+    private TextView originalText, grayText, magicText, bwText, smoothText, filterText, adjustText;
     private Dialog checkDialog;
-    private DataSingleton dataSingleton;
+    private FormSingleton formSingleton;
+    private Filter filter;
 
     public static EditFragment newInstance() {
         EditFragment fragment = new EditFragment();
@@ -40,10 +39,10 @@ public class EditFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        dataSingleton = DataSingleton.get(getActivity());
-        originalBitmap = dataSingleton.getData().getCropBitmap();
-        editBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+        formSingleton = FormSingleton.get(getActivity());
+        cropBitmap = formSingleton.getForm().getCropBitmap();
+        originalBitmap = cropBitmap.copy(cropBitmap.getConfig(), true);
+        filter = new Filter(originalBitmap);
     }
 
     @Nullable
@@ -54,8 +53,14 @@ public class EditFragment extends Fragment {
         filterButton = v.findViewById(R.id.filterButton);
         backButton = v.findViewById(R.id.edit_back);
         checkButton = v.findViewById(R.id.edit_check);
+        adjustButton = v.findViewById(R.id.adjustButton);
+        filterButton = v.findViewById(R.id.filterButton);
+        originalImage = v.findViewById(R.id.originalImageView);
+        grayImage = v.findViewById(R.id.grayImageView);
+        bwImage = v.findViewById(R.id.bwImageView);
+        smoothImage = v.findViewById(R.id.smoothImageView);
+        magicImage = v.findViewById(R.id.magicImageView);
         editImage = v.findViewById(R.id.image_edit);
-        editImage.setImageBitmap(editBitmap);
         checkDialog = new Dialog(getActivity());
         checkDialog.setContentView(R.layout.dialog_save);
         checkDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -63,6 +68,70 @@ public class EditFragment extends Fragment {
         checkDialog.setCancelable(false);
         saveButton = checkDialog.findViewById(R.id.btn_save_yes);
         cancelButton = checkDialog.findViewById(R.id.btn_save_no);
+
+        originalText = v.findViewById(R.id.originalTextView);
+        grayText = v.findViewById(R.id.grayTextView);
+        bwText = v.findViewById(R.id.bwTextView);
+        smoothText = v.findViewById(R.id.smoothTextView);
+        magicText = v.findViewById(R.id.magicTextView);
+
+        originalImage.setImageBitmap(originalBitmap);
+        grayBitmap = filter.getGrayBitmap();
+        grayImage.setImageBitmap(grayBitmap);
+        bwBitmap = filter.getBWBitmap();
+        bwImage.setImageBitmap(bwBitmap);
+        smoothBitmap = filter.getSmoothBitmap();
+        smoothImage.setImageBitmap(smoothBitmap);
+        magicBitmap = filter.getMagicColorBitmap();
+        magicImage.setImageBitmap(magicBitmap);
+
+        editBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+        setSelectedFilter(originalText);
+        editImage.setImageBitmap(editBitmap);
+
+        originalImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+                setSelectedFilter(originalText);
+                editImage.setImageBitmap(editBitmap);
+            }
+        });
+
+        grayImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editBitmap = grayBitmap.copy(grayBitmap.getConfig(), true);
+                setSelectedFilter(grayText);
+                editImage.setImageBitmap(editBitmap);
+            }
+        });
+
+        magicImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editBitmap = magicBitmap.copy(magicBitmap.getConfig(), true);
+                setSelectedFilter(magicText);
+                editImage.setImageBitmap(editBitmap);
+            }
+        });
+
+        bwImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editBitmap = bwBitmap.copy(bwBitmap.getConfig(), true);
+                setSelectedFilter(bwText);
+                editImage.setImageBitmap(editBitmap);
+            }
+        });
+        smoothImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editBitmap = smoothBitmap.copy(smoothBitmap.getConfig(), true);
+                setSelectedFilter(smoothText);
+                editImage.setImageBitmap(editBitmap);
+            }
+        });
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,8 +170,59 @@ public class EditFragment extends Fragment {
             }
         });
 
-
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.i("123123","destroyView");
+        if (editBitmap != null) {
+            editBitmap.recycle();
+            editBitmap = null;
+        }
+
+        if (grayBitmap != null) {
+            grayBitmap.recycle();
+            grayBitmap = null;
+        }
+
+        if (bwBitmap != null) {
+            bwBitmap.recycle();
+            bwBitmap = null;
+        }
+
+        if (magicBitmap != null) {
+            magicBitmap.recycle();
+            magicBitmap = null;
+        }
+
+        if (smoothBitmap != null) {
+            smoothBitmap.recycle();
+            smoothBitmap = null;
+        }
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("123123","destroy");
+
+        if (originalBitmap != null) {
+            originalBitmap.recycle();
+            originalBitmap = null;
+        }
+
+    }
+
+    private void setSelectedFilter(TextView selectedText) {
+        originalText.setBackgroundColor(getResources().getColor(R.color.filter));
+        grayText.setBackgroundColor(getResources().getColor(R.color.filter));
+        magicText.setBackgroundColor(getResources().getColor(R.color.filter));
+        bwText.setBackgroundColor(getResources().getColor(R.color.filter));
+        smoothText.setBackgroundColor(getResources().getColor(R.color.filter));
+        selectedText.setBackgroundColor(getResources().getColor(R.color.primary));
     }
 
     private Bitmap rotateImage(Bitmap source, float angle) {

@@ -349,7 +349,6 @@ public class FormDetector {
         }
         Point[] pts = new Point[]{topLeft,topRight, bottomRight, bottomLeft};
         screenCnt2f = new MatOfPoint2f(pts);
-        Log.i("1231233312",screenCnt2f.dump());
         return screenCnt2f;
     }
 

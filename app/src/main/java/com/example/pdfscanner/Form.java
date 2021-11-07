@@ -4,17 +4,15 @@ import android.graphics.Bitmap;
 
 import org.opencv.core.Point;
 
-public class Data {
+public class Form {
     private Bitmap originalBitmap;
     private Point[] points;
     private Bitmap cropBitmap;
-    private Bitmap filterBitmap;
 
-    public Data() {
+    public Form() {
         this.points = null;
         this.originalBitmap = null;
         this.cropBitmap = null;
-        this.filterBitmap = null;
     }
 
     public Bitmap getOriginalBitmap() {
@@ -41,11 +39,15 @@ public class Data {
         this.cropBitmap = cropBitmap.copy(cropBitmap.getConfig(), true);;
     }
 
-    public Bitmap getFilterBitmap() {
-        return filterBitmap;
-    }
-
-    public void setFilterBitmap(Bitmap filterBitmap) {
-        this.filterBitmap = filterBitmap;
+    public void Recycle() {
+        if (this.originalBitmap!=null) {
+            this.originalBitmap.recycle();
+            this.originalBitmap = null;
+        }
+        if (this.cropBitmap!=null) {
+            this.cropBitmap.recycle();
+            this.cropBitmap = null;
+        }
+        points = null;
     }
 }
