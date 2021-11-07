@@ -45,6 +45,7 @@ public class CropFragment extends Fragment {
     private Button deleteButton, cropButton, backButton, forwardButton, deleteNoButton, deleteYesButton;
     private ImageView cropImage;
     private Bitmap rgbFrameBitmap;
+    private Bitmap displayBitmap;
     public Bitmap cropResult;
     private PolygonView polygonView;
     private FrameLayout sourceFrame;
@@ -207,11 +208,11 @@ public class CropFragment extends Fragment {
     }
 
     private void setBitmap(Bitmap original) {
-        setScalePoint(original, sourceFrame.getWidth(), sourceFrame.getHeight());
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) (rgbFrameBitmap.getWidth()*scale), (int) (rgbFrameBitmap.getHeight()*scale));
+        displayBitmap = setScalePoint(original, sourceFrame.getWidth(), sourceFrame.getHeight());
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) (displayBitmap.getWidth()), (int) (displayBitmap.getHeight()));
         layoutParams.gravity = Gravity.CENTER;
         polygonView.setLayoutParams(layoutParams);
-        cropImage.setImageBitmap(rgbFrameBitmap);
+        cropImage.setImageBitmap(displayBitmap);
         this.cropPoint = dataSingleton.getData().getPoints();
         if (this.cropPoint==null) {
             this.cropPoint = FormDetector.detector(rgbFrameBitmap);
@@ -228,12 +229,19 @@ public class CropFragment extends Fragment {
         return new Point[]{point_0,point_1,point_2,point_3};
     }
 
-    public void setScalePoint(Bitmap bm, int newWidth, int newHeight) {
+    public Bitmap setScalePoint(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
         float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
         scale = Math.min(scaleHeight,scaleWidth);
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scale, scale);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
+        return resizedBitmap;
     }
 
     private Bitmap perspectiveTransform(Bitmap inputBitmap, Point topLeft, Point topRight, Point bottomRight, Point bottomLeft) {
