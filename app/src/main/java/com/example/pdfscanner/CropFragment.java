@@ -1,6 +1,7 @@
 package com.example.pdfscanner;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import androidx.exifinterface.media.ExifInterface;
@@ -201,6 +203,21 @@ public class CropFragment extends Fragment {
                             .replace(R.id.edit_container, EditFragment.newInstance(), "EDIT_FRAGMENT")
                             .addToBackStack(null)
                             .commit();
+                } else {
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+                    builder1.setMessage("Error\n \nCannot Crop Image.");
+                    builder1.setCancelable(true);
+
+                    builder1.setPositiveButton(
+                            "Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
                 }
             }
         });
@@ -264,7 +281,6 @@ public class CropFragment extends Fragment {
 
         int resultWidth = (int) (Math.max(getPointsDistance(topLeft, topRight) , getPointsDistance(bottomLeft, bottomRight)));
         int resultHeight = (int) (Math.max(getPointsDistance(topLeft, bottomLeft) , getPointsDistance(topRight, bottomRight)));
-        Log.i("213123",String.valueOf(resultWidth) + " " + resultHeight);
         Mat outputMat = new Mat(resultWidth, resultHeight, CvType.CV_8UC1);
 
         Point ocvPOut1 = new Point(0, 0);

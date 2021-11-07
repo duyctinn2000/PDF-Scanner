@@ -9,6 +9,7 @@ import static java.lang.Math.sqrt;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -288,7 +289,7 @@ public class FormDetector {
         return new Point(0, 0);
     }
 
-    private static MatOfPoint2f sortPointClockwise(MatOfPoint2f screenCnt2f) {
+    public static MatOfPoint2f sortPointClockwise(MatOfPoint2f screenCnt2f) {
         if (screenCnt2f.toArray().length != 4) {
             return screenCnt2f;
         }
@@ -308,11 +309,14 @@ public class FormDetector {
         Point topLeft = points.get(0);
         Point bottomRight = points.get(3);
 
+        List<Point> points_1 = new ArrayList<Point>();
+        points_1.add(points.get(1));
+        points_1.add(points.get(2));
 
         // # now, compute the difference between the points, the
         // # top-right point will have the smallest difference,
         // # whereas the bottom-left will have the largest difference
-        Collections.sort(points, new Comparator<Point>() {
+        Collections.sort(points_1, new Comparator<Point>() {
             @Override
             public int compare(Point p1, Point p2) {
                 double s1 = p1.y - p1.x  ;
@@ -320,12 +324,32 @@ public class FormDetector {
                 return Double.compare(s1, s2);
             }
         });
-        Point topRight = points.get(0);
-        Point bottomLeft = points.get(3);
-
+        Point topRight = points_1.get(0);
+        Point bottomLeft = points_1.get(1);
+        Point temp;
+        if (topLeft.y>bottomLeft.y) {
+            temp = topLeft;
+            topLeft = bottomLeft;
+            bottomLeft = temp;
+        }
+        if (topRight.y>bottomRight.y) {
+            temp = topRight;
+            topRight = bottomRight;
+            bottomRight = temp;
+        }
+        if (topLeft.x>topRight.x) {
+            temp = topLeft;
+            topLeft = topRight;
+            topRight = temp;
+        }
+        if (bottomLeft.x>bottomRight.x) {
+            temp = bottomLeft;
+            bottomLeft = bottomRight;
+            bottomRight = temp;
+        }
         Point[] pts = new Point[]{topLeft,topRight, bottomRight, bottomLeft};
-
         screenCnt2f = new MatOfPoint2f(pts);
+        Log.i("1231233312",screenCnt2f.dump());
         return screenCnt2f;
     }
 

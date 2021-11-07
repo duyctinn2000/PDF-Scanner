@@ -17,6 +17,9 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.pdfscanner.formdetector.FormDetector;
+
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 
@@ -191,8 +194,12 @@ public class PolygonView extends RelativeLayout {
         points.add(new PointF(topRight.getX(), topRight.getY()));
         points.add(new PointF(bottomLeft.getX(), bottomLeft.getY()));
         points.add(new PointF(bottomRight.getX(), bottomRight.getY()));
-
-        return getOrderedPoints(points);
+        try {
+            return getOrderedPoints(points);
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
     public Point[] getOrderedPoints(List<PointF> points) {
@@ -229,6 +236,27 @@ public class PolygonView extends RelativeLayout {
         return null;
     }
 
+    public void setOrderedPoints() {
+        MatOfPoint2f mop = new MatOfPoint2f();
+        Point tL = new Point(topLeft.getX(), topLeft.getY());
+        Point tR = new Point(topRight.getX(), topRight.getY());
+        Point bL = new Point(bottomLeft.getX(), bottomLeft.getY());
+        Point bR = new Point(bottomRight.getX(), bottomRight.getY());
+        Point[] cropPoints = new Point[]{tL, tR, bR, bL};
+        mop.fromArray(cropPoints);
+        Point[] x = FormDetector.sortPointClockwise(mop).toArray();
+        topLeft.setX((float) x[0].x);
+        topLeft.setY((float) x[0].y);
+        topRight.setX((float) x[1].x);
+        topRight.setY((float) x[1].y);
+        bottomLeft.setX((float) x[3].x);
+        bottomLeft.setY((float) x[3].y);
+        bottomRight.setX((float) x[2].x );
+        bottomRight.setY((float) x[2].y );
+        invalidate();
+
+    }
+
     private class TouchPointListener implements OnTouchListener{
 
         PointF DownPT = new PointF(); // Record Mouse Position When Pressed Down
@@ -252,6 +280,7 @@ public class PolygonView extends RelativeLayout {
                     StartPT = new PointF(v.getX(),v.getY());
                     break;
                 case MotionEvent.ACTION_UP:
+                    setOrderedPoints();
                     int color = 0;
                     if (isValidShape(getPoints())) {
                         color = getResources().getColor(R.color.point_true);
@@ -318,6 +347,7 @@ public class PolygonView extends RelativeLayout {
                     break;
                 case MotionEvent.ACTION_UP:
                     int color = 0;
+                    setOrderedPoints();
                     if (isValidShape(getPoints())) {
                         color = getResources().getColor(R.color.point_true);
                     } else {
