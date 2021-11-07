@@ -93,13 +93,14 @@ public class EditFragment extends Fragment {
             }
         });
 
-
         rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = rotateImage(editBitmap,90);
+                editBitmap = rotateImage(editBitmap, 90);
+                editImage.setImageBitmap(editBitmap);
             }
         });
+
 
         return v;
     }

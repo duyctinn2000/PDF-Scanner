@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +53,7 @@ public class CropFragment extends Fragment {
     private Point[] cropPoint;
     private boolean isAutoCrop = true;
     private DataSingleton dataSingleton;
-
+    private float scale;
 
     public static CropFragment newInstance(String imgPath) {
         Bundle args = new Bundle();
@@ -182,7 +183,7 @@ public class CropFragment extends Fragment {
                     isAutoCrop = true;
                     cropTextView.setText("Full");
                     cropPoint = FormDetector.detector(rgbFrameBitmap);
-                    polygonView.setCropPoints(cropPoint);
+                    polygonView.setCropPoints(getScalePoint(cropPoint));
                 }
             }
         });
@@ -193,7 +194,6 @@ public class CropFragment extends Fragment {
                 Point[] points = polygonView.getPoints();
                 rgbFrameBitmap = null;
                 if (points!=null) {
-                    dataSingleton.getData().setPoints(points);
                     cropResult = perspectiveTransform(dataSingleton.getData().getOriginalBitmap(), points[0], points[1], points[2], points[3]);
                     dataSingleton.getData().setCropBitmap(cropResult);
                     getActivity().getSupportFragmentManager().beginTransaction()
@@ -207,8 +207,8 @@ public class CropFragment extends Fragment {
     }
 
     private void setBitmap(Bitmap original) {
-        this.rgbFrameBitmap = getResizedBitmap(original, sourceFrame.getWidth(), sourceFrame.getHeight());
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(rgbFrameBitmap.getWidth(),rgbFrameBitmap.getHeight());
+        setScalePoint(original, sourceFrame.getWidth(), sourceFrame.getHeight());
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) (rgbFrameBitmap.getWidth()*scale), (int) (rgbFrameBitmap.getHeight()*scale));
         layoutParams.gravity = Gravity.CENTER;
         polygonView.setLayoutParams(layoutParams);
         cropImage.setImageBitmap(rgbFrameBitmap);
@@ -216,35 +216,32 @@ public class CropFragment extends Fragment {
         if (this.cropPoint==null) {
             this.cropPoint = FormDetector.detector(rgbFrameBitmap);
         }
-        polygonView.setCropPoints(this.cropPoint);
+        polygonView.setCropPoints(getScalePoint(this.cropPoint));
         polygonView.setVisibility(View.VISIBLE);
     }
 
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+    private Point[] getScalePoint(Point[] points) {
+        Point point_0 = new Point(points[0].x*scale,points[0].y*scale);
+        Point point_1 = new Point(points[1].x*scale,points[1].y*scale);
+        Point point_2 = new Point(points[2].x*scale,points[2].y*scale);
+        Point point_3 = new Point(points[3].x*scale,points[3].y*scale);
+        return new Point[]{point_0,point_1,point_2,point_3};
+    }
+
+    public void setScalePoint(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
         float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
-        float scale = Math.min(scaleHeight,scaleWidth);
-        dataSingleton.getData().setScale(1/scale);
-
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scale, scale);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
-        bm.recycle();
-        return resizedBitmap;
+        scale = Math.min(scaleHeight,scaleWidth);
     }
 
     private Bitmap perspectiveTransform(Bitmap inputBitmap, Point topLeft, Point topRight, Point bottomRight, Point bottomLeft) {
-        float scale = dataSingleton.getData().getScale();
-        topLeft = new Point(topLeft.x*scale,topLeft.y*scale);
-        topRight = new Point(topRight.x*scale,topRight.y*scale);
-        bottomLeft = new Point(bottomLeft.x*scale,bottomLeft.y*scale);
-        bottomRight = new Point(bottomRight.x*scale,bottomRight.y*scale);
+        topLeft = new Point(topLeft.x/scale,topLeft.y/scale);
+        topRight = new Point(topRight.x/scale,topRight.y/scale);
+        bottomLeft = new Point(bottomLeft.x/scale,bottomLeft.y/scale);
+        bottomRight = new Point(bottomRight.x/scale,bottomRight.y/scale);
+        dataSingleton.getData().setPoints(new Point[]{topLeft,topRight,bottomRight,bottomLeft});
 
         Mat inputMat = new Mat(inputBitmap.getWidth(), inputBitmap.getHeight(), CvType.CV_8UC1);
         Utils.bitmapToMat(inputBitmap, inputMat);
@@ -257,9 +254,9 @@ public class CropFragment extends Fragment {
 
         Mat startM = Converters.vector_Point2f_to_Mat(source);
 
-        int resultWidth = (int) (Math.max(getPointsDistance(topLeft, topRight) , getPointsDistance(bottomLeft, bottomRight))/2);
-        int resultHeight = (int) (Math.max(getPointsDistance(topLeft, topRight) , getPointsDistance(bottomLeft, bottomRight))/2);
-
+        int resultWidth = (int) (Math.max(getPointsDistance(topLeft, topRight) , getPointsDistance(bottomLeft, bottomRight)));
+        int resultHeight = (int) (Math.max(getPointsDistance(topLeft, bottomLeft) , getPointsDistance(topRight, bottomRight)));
+        Log.i("213123",String.valueOf(resultWidth) + " " + resultHeight);
         Mat outputMat = new Mat(resultWidth, resultHeight, CvType.CV_8UC1);
 
         Point ocvPOut1 = new Point(0, 0);
@@ -289,7 +286,7 @@ public class CropFragment extends Fragment {
     }
 
     private double getPointsDistance(Point p1, Point p2) {
-        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.x - p2.y, 2));
+        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
 
 }

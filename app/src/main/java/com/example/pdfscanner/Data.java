@@ -9,22 +9,12 @@ public class Data {
     private Point[] points;
     private Bitmap cropBitmap;
     private Bitmap filterBitmap;
-    private float scale;
-
-    public float getScale() {
-        return scale;
-    }
-
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
 
     public Data() {
         this.points = null;
         this.originalBitmap = null;
         this.cropBitmap = null;
         this.filterBitmap = null;
-        this.scale = 0.0F;
     }
 
     public Bitmap getOriginalBitmap() {
