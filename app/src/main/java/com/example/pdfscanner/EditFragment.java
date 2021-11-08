@@ -309,7 +309,6 @@ public class EditFragment extends Fragment {
         if (filter != null) {
             filter.Recycle();
         }
-
     }
 
     private void setSelectedFilter(TextView selectedText) {

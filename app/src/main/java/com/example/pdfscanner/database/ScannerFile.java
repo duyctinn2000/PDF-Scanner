@@ -1,21 +1,23 @@
-package com.example.pdfscanner;
+package com.example.pdfscanner.database;
 
 import java.util.Date;
 import java.util.UUID;
 
-public class File {
+public class ScannerFile {
     private UUID mId;
     private String mTitle;
     private Date mDate;
     private String mType;
-    private String mUrl;
 
-
-    public File() {
+    public ScannerFile() {
         this.mId = UUID.randomUUID();
-        this.mDate = new Date();
+        mDate = new Date();
     }
 
+    public ScannerFile(UUID id) {
+        this.mId = id;
+        mDate = new Date();
+    }
     public UUID getId() {
         return mId;
     }
@@ -44,11 +46,4 @@ public class File {
         this.mType = type;
     }
 
-    public void setmUrl(String url) {
-        this.mUrl = url;
-    }
-
-    public String getUrl() {
-        return mUrl;
-    }
 }

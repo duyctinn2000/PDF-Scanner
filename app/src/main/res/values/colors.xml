@@ -14,4 +14,5 @@
     <color name="point_true">#2FE910</color>
     <color name="point_false">#D80E0E</color>
     <color name="filter"> #7A000000 </color>
+    <color name="background">#f6faff</color>
 </resources>
