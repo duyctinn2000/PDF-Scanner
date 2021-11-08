@@ -30,5 +30,8 @@ public class FormSingleton {
         if (form!=null) {
             form.Recycle();
         }
+        if (formSingleton!=null) {
+            formSingleton = null;
+        }
     }
 }

@@ -24,7 +24,7 @@ import java.util.Objects;
 public class EditFragment extends Fragment {
     private Button rotateButton, filterButton, backButton, checkButton, adjustButton, saveButton, cancelButton;
     private ImageView editImage, originalImage , grayImage, bwImage, smoothImage, magicImage;;
-    private Bitmap originalBitmap,cropBitmap, grayBitmap, bwBitmap, smoothBitmap, magicBitmap;
+    private Bitmap originalBitmap, cropBitmap;
     private Bitmap editBitmap;
     private TextView originalText, grayText, magicText, bwText, smoothText, filterText, adjustText;
     private Dialog checkDialog;
@@ -41,7 +41,7 @@ public class EditFragment extends Fragment {
         super.onCreate(savedInstanceState);
         formSingleton = FormSingleton.get(getActivity());
         cropBitmap = formSingleton.getForm().getCropBitmap();
-        originalBitmap = cropBitmap.copy(cropBitmap.getConfig(), true);
+        originalBitmap = cropBitmap.copy(cropBitmap.getConfig(), false);
         filter = new Filter(originalBitmap);
     }
 
@@ -76,14 +76,10 @@ public class EditFragment extends Fragment {
         magicText = v.findViewById(R.id.magicTextView);
 
         originalImage.setImageBitmap(originalBitmap);
-        grayBitmap = filter.getGrayBitmap();
-        grayImage.setImageBitmap(grayBitmap);
-        bwBitmap = filter.getBWBitmap();
-        bwImage.setImageBitmap(bwBitmap);
-        smoothBitmap = filter.getSmoothBitmap();
-        smoothImage.setImageBitmap(smoothBitmap);
-        magicBitmap = filter.getMagicColorBitmap();
-        magicImage.setImageBitmap(magicBitmap);
+        grayImage.setImageBitmap(applyFilter("Gray"));
+        bwImage.setImageBitmap(applyFilter("BW"));
+        smoothImage.setImageBitmap(applyFilter("Smooth"));
+        magicImage.setImageBitmap(applyFilter("Magic"));
 
         editBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
         setSelectedFilter(originalText);
@@ -92,44 +88,39 @@ public class EditFragment extends Fragment {
         originalImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
                 setSelectedFilter(originalText);
-                editImage.setImageBitmap(editBitmap);
+                editImage.setImageBitmap(applyFilter("No"));
             }
         });
 
         grayImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = grayBitmap.copy(grayBitmap.getConfig(), true);
                 setSelectedFilter(grayText);
-                editImage.setImageBitmap(editBitmap);
+                editImage.setImageBitmap(applyFilter("Gray"));
             }
         });
 
         magicImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = magicBitmap.copy(magicBitmap.getConfig(), true);
                 setSelectedFilter(magicText);
-                editImage.setImageBitmap(editBitmap);
+                editImage.setImageBitmap(applyFilter("Magic"));
             }
         });
 
         bwImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = bwBitmap.copy(bwBitmap.getConfig(), true);
                 setSelectedFilter(bwText);
-                editImage.setImageBitmap(editBitmap);
+                editImage.setImageBitmap(applyFilter("BW"));
             }
         });
         smoothImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = smoothBitmap.copy(smoothBitmap.getConfig(), true);
                 setSelectedFilter(smoothText);
-                editImage.setImageBitmap(editBitmap);
+                editImage.setImageBitmap(applyFilter("Smooth"));
             }
         });
 
@@ -176,44 +167,41 @@ public class EditFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.i("123123","destroyView");
         if (editBitmap != null) {
             editBitmap.recycle();
             editBitmap = null;
         }
-
-        if (grayBitmap != null) {
-            grayBitmap.recycle();
-            grayBitmap = null;
-        }
-
-        if (bwBitmap != null) {
-            bwBitmap.recycle();
-            bwBitmap = null;
-        }
-
-        if (magicBitmap != null) {
-            magicBitmap.recycle();
-            magicBitmap = null;
-        }
-
-        if (smoothBitmap != null) {
-            smoothBitmap.recycle();
-            smoothBitmap = null;
-        }
-
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i("123123","destroy");
-
         if (originalBitmap != null) {
             originalBitmap.recycle();
             originalBitmap = null;
         }
 
+    }
+
+    private Bitmap applyFilter(String filterName) {
+        Bitmap filterBitmap = null;
+
+        if (filterName.equals("Gray")) {
+            filterBitmap = filter.getGrayBitmap();
+        }
+        else if (filterName.equals("Smooth")) {
+            filterBitmap = filter.getSmoothBitmap();
+        }
+        else if (filterName.equals("Magic")) {
+            filterBitmap = filter.getMagicColorBitmap();
+        }
+        else if (filterName.equals("BW")) {
+            filterBitmap = filter.getBWBitmap();
+        }
+        else {
+            filterBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
+        }
+        return filterBitmap;
     }
 
     private void setSelectedFilter(TextView selectedText) {

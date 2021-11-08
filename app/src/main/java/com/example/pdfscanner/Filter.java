@@ -53,4 +53,5 @@ public class Filter {
         Utils.matToBitmap(blurMat, blurBitmap);
         return blurBitmap;
     }
+
 }
