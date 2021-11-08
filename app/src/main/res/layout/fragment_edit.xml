@@ -224,7 +224,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             app:layout_constraintBottom_toBottomOf="@+id/brightnessImageView"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/brightnessText"
             app:layout_constraintStart_toEndOf="@+id/brightnessImageView"
             app:layout_constraintTop_toTopOf="@+id/brightnessImageView" />
 
@@ -234,9 +234,29 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             app:layout_constraintBottom_toBottomOf="@+id/contrastImageView"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/contrastText"
             app:layout_constraintStart_toEndOf="@+id/contrastImageView"
             app:layout_constraintTop_toTopOf="@+id/contrastImageView" />
+
+        <TextView
+            android:id="@+id/brightnessText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/brightnessImageView"
+            app:layout_constraintTop_toTopOf="@+id/brightnessImageView"
+            android:text="50"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/contrastText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/contrastImageView"
+            app:layout_constraintTop_toTopOf="@+id/contrastImageView"
+            android:text="50"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -294,7 +314,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:text="Filter"
-            android:textColor="@color/white"
+            android:textColor="@color/primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/filterButton"
             app:layout_constraintStart_toStartOf="@+id/filterButton" />

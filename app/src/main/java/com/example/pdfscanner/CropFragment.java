@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -281,6 +282,12 @@ public class CropFragment extends Fragment {
 
         int resultWidth = (int) (Math.max(getPointsDistance(topLeft, topRight) , getPointsDistance(bottomLeft, bottomRight)));
         int resultHeight = (int) (Math.max(getPointsDistance(topLeft, bottomLeft) , getPointsDistance(topRight, bottomRight)));
+        if (resultWidth>1024) {
+            float resultScale = (float) resultWidth/1024;
+            resultWidth = 1024;
+            resultHeight = (int) (resultHeight/resultScale);
+        }
+        Log.i("131231",resultWidth+ " "+ resultHeight);
         Mat outputMat = new Mat(resultWidth, resultHeight, CvType.CV_8UC1);
 
         Point ocvPOut1 = new Point(0, 0);

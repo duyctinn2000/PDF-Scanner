@@ -54,4 +54,29 @@ public class Filter {
         return blurBitmap;
     }
 
+    public Bitmap getAdjustBitmap(Bitmap editBitmap, int contrast, int bright) {
+        Mat editMat = new Mat(editBitmap.getWidth(), editBitmap.getHeight(), CvType.CV_8UC1);
+        Utils.bitmapToMat(editBitmap, editMat);
+        float alpha = (float) 1 + (float) (contrast-50)*3/50;
+        if (contrast<50) {
+            alpha = (float) contrast/50;
+        }
+        else if (contrast==50) {
+            alpha = 1.0F;
+        }
+
+        float beta = (float) (bright-50) *200/50;
+        editMat.convertTo(editMat,-1, alpha, beta);
+        Bitmap newBitmap = Bitmap.createBitmap(originalMat.cols(), originalMat.rows(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(editMat, newBitmap);
+        return newBitmap;
+    }
+
+    public void Recycle() {
+        if (originalMat!=null) {
+            originalMat.release();
+            originalMat = null;
+        }
+    }
+
 }
