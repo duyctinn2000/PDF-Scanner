@@ -43,20 +43,40 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/save_filename"
+                android:layout_marginHorizontal="20dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="50dp"
-                android:text="Are you sure?"
+                android:hint="Enter file name"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
-            <TextView
+            <RadioGroup
+                android:id="@+id/save_format"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="You may save this photo" />
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center">
+                <RadioButton
+                    android:id="@+id/save_jpeg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="JPEG"
+                    android:layout_marginHorizontal="10dp"/>
+                <RadioButton
+                    android:checked="true"
+                    android:textColor="@color/primary"
+                    android:id="@+id/save_pdf"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PDF"/>
+            </RadioGroup>
+
         </LinearLayout>
 
         <View

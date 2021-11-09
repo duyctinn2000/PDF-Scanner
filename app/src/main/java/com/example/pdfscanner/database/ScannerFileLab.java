@@ -58,6 +58,15 @@ public class ScannerFileLab {
         return scannerFiles;
     }
 
+    public boolean checkTitle(String file_name) {
+        ScannerFileCursorWrapper cursorWrapper = queryScannerFiles(FileTable.Cols.TITLE + "= ?", new String[]{file_name});
+        if (cursorWrapper.getCount()==0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void removeScannerFile(ScannerFile s) {
         String uuidString = s.getId().toString();
         database.delete(FileTable.NAME, FileTable.Cols.UUID + "= ?", new String[]{uuidString});

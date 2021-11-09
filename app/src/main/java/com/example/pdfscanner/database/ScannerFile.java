@@ -18,6 +18,7 @@ public class ScannerFile {
         this.mId = id;
         mDate = new Date();
     }
+
     public UUID getId() {
         return mId;
     }

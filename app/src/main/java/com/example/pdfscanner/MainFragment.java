@@ -1,5 +1,6 @@
 package com.example.pdfscanner;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -127,7 +128,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == getActivity().RESULT_OK) {
+        if ((requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_IMAGE_SELECT) && resultCode == Activity.RESULT_OK) {
 
             String imgPath;
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
@@ -177,7 +178,11 @@ public class MainFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(), "clicked", Toast.LENGTH_SHORT).show();
+            ViewFileFragment viewFileFragment = ViewFileFragment.newIntance(scannerFile.getId());
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, viewFileFragment, "VIEW_FILE_FRAGMENT")
+                    .addToBackStack(null)
+                    .commit();
         }
     }
 
