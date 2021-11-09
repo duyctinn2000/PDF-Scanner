@@ -1,11 +1,21 @@
 package com.example.pdfscanner;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +28,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.example.pdfscanner.database.ScannerFile;
 import com.example.pdfscanner.database.ScannerFileLab;
 import com.github.barteksc.pdfviewer.PDFView;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 public class ViewFileFragment extends Fragment {
@@ -136,6 +154,7 @@ public class ViewFileFragment extends Fragment {
                 builder1.setTitle("Rename");
                 builder1.setCancelable(true);
                 final EditText editFileName = new EditText(getActivity());
+                editFileName.setHint("Enter new file name");
                 builder1.setView(editFileName);
                 builder1.setPositiveButton(
                         "Ok",
@@ -152,7 +171,7 @@ public class ViewFileFragment extends Fragment {
                                         fileNameText.setText(newFileName+"."+scannerFile.getType());
                                         ScannerFileLab.get(getActivity()).updateScannerFile(scannerFile);
                                     } else {
-                                        Toast.makeText(getActivity(), "Something went wrong", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getActivity(), "Erorr: Something went wrong", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                                 else if (newFileName.equals("")) {
@@ -176,6 +195,78 @@ public class ViewFileFragment extends Fragment {
             }
         });
 
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                if (scannerFile.getType().equals("pdf")) {
+                    i.setType("application/pdf");
+                } else {
+                    i.setType("image/jpeg");
+                }
+                i.putExtra(Intent.EXTRA_TEXT, "Sharing File from PDFScanner");
+                Uri path = FileProvider.getUriForFile(getActivity(),"com.example.pdfscanner.fileprovider",file);
+                i.putExtra(Intent.EXTRA_STREAM, path);
+                i = Intent.createChooser(i, "Sharing File from PDFScanner");
+                List<ResolveInfo> resInfoList = getActivity().getPackageManager().queryIntentActivities(i, PackageManager.MATCH_DEFAULT_ONLY);
+
+                for (ResolveInfo resolveInfo : resInfoList) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    getActivity().grantUriPermission(packageName, path, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+
+                startActivity(i);
+            }
+        });
+
+        downloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String mimeType = "application/pdf";
+                if (!scannerFile.getType().equals("pdf")) {
+                    mimeType = "image/jpeg";
+                }
+                try {
+                    copyFileToDownloads(getActivity(), file, scannerFile.getTitle()+"."+scannerFile.getType(),mimeType);
+                    Toast.makeText(getActivity(), "File downloaded successfully", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    Toast.makeText(getActivity(), "Error: Something went wrong", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        });
+
         return v;
+    }
+
+    private void copyFileToDownloads(Context context, File downloadFile, String fileName, String mimeType) throws IOException {
+        Uri downloadedUri;
+        ContentResolver resolver = context.getContentResolver();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+            contentValues.put(MediaStore.MediaColumns.SIZE, downloadFile.length());
+            downloadedUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
+        } else {
+            File destinyFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+            downloadedUri = FileProvider.getUriForFile(getActivity(), "com.example.pdfscanner.fileprovider", destinyFile);
+        }
+        FileOutputStream outputStream = (FileOutputStream) resolver.openOutputStream(downloadedUri);;
+        byte[] brr = new byte[1024];
+        FileInputStream myFile = new FileInputStream(downloadFile.getAbsoluteFile());
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(myFile);
+        while (true) {
+            int inByteValue = bufferedInputStream.read(brr,0,brr.length);
+            if (inByteValue>0) {
+              outputStream.write(brr,0,inByteValue);
+            }
+            else {
+                break;
+            }
+        }
+        outputStream.flush();
+        outputStream.close();
+        bufferedInputStream.close();
     }
 }
