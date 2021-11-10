@@ -38,13 +38,14 @@ import org.opencv.utils.Converters;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class CropFragment extends Fragment {
     private static final String SOURCE_IMAGE = "crop_image";
     private String sourcePath;
-    private Button deleteButton, cropButton, backButton, forwardButton, deleteNoButton, deleteYesButton;
+    private Button rotateButton, cropButton, backButton, forwardButton;
     private ImageView cropImage;
     private Bitmap rgbFrameBitmap;
     private Bitmap displayBitmap;
@@ -52,11 +53,11 @@ public class CropFragment extends Fragment {
     private PolygonView polygonView;
     private FrameLayout sourceFrame;
     TextView cropTextView;
-    private Dialog deleteDialog;
     private Point[] cropPoint;
     private boolean isAutoCrop = true;
     private FormSingleton formSingleton;
-    private float scale;
+    private float scale_original;
+    private float scale_rotate;
 
     public static CropFragment newInstance(String imgPath) {
         Bundle args = new Bundle();
@@ -121,7 +122,7 @@ public class CropFragment extends Fragment {
             }
         }
 
-        deleteButton = v.findViewById(R.id.deleteButton);
+        rotateButton = v.findViewById(R.id.rotateButton);
         cropButton = v.findViewById(R.id.cropButton);
         backButton = v.findViewById(R.id.crop_back);
         forwardButton = v.findViewById(R.id.crop_forward);
@@ -129,14 +130,8 @@ public class CropFragment extends Fragment {
         polygonView = v.findViewById(R.id.polygonView);
         polygonView.setVisibility(View.GONE);
         sourceFrame = v.findViewById(R.id.sourceFrame);
-        deleteDialog = new Dialog(getActivity());
-        deleteDialog.setContentView(R.layout.dialog_delete);
-        deleteDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        deleteDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        deleteDialog.setCancelable(false);
         cropTextView = v.findViewById(R.id.cropTextView);
-        deleteNoButton = deleteDialog.findViewById(R.id.btn_delete_no);
-        deleteYesButton = deleteDialog.findViewById(R.id.btn_delete_yes);
+
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,25 +140,10 @@ public class CropFragment extends Fragment {
             }
         });
 
-        deleteButton.setOnClickListener(new View.OnClickListener() {
+        rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteDialog.show();
-            }
-        });
-
-        deleteNoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                deleteDialog.dismiss();
-            }
-        });
-
-        deleteYesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(),MainActivity.class);
-                startActivity(intent);
+                rotateImageAndPoint();
             }
         });
 
@@ -239,7 +219,7 @@ public class CropFragment extends Fragment {
         polygonView.setVisibility(View.VISIBLE);
     }
 
-    private Point[] getScalePoint(Point[] points) {
+    private Point[] getScalePoint(Point[] points, float scale) {
         Point point_0 = new Point(points[0].x*scale,points[0].y*scale);
         Point point_1 = new Point(points[1].x*scale,points[1].y*scale);
         Point point_2 = new Point(points[2].x*scale,points[2].y*scale);
@@ -252,10 +232,13 @@ public class CropFragment extends Fragment {
         int height = bm.getHeight();
         float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
-        scale = Math.min(scaleHeight,scaleWidth);
+        scale_original = Math.min(scaleHeight,scaleWidth);
+        scaleWidth = ((float) newWidth) / height;
+        scaleHeight = ((float) newHeight) / width;
+        scale_rotate = Math.min(scaleHeight,scaleWidth);
         Matrix matrix = new Matrix();
         // RESIZE THE BIT MAP
-        matrix.postScale(scale, scale);
+        matrix.postScale(scale_original, scale_original);
 
         // "RECREATE" THE NEW BITMAP
         Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
@@ -310,7 +293,32 @@ public class CropFragment extends Fragment {
         return output;
     }
 
-    private Bitmap rotateImage(Bitmap source, float angle) {
+    private void rotateImageAndPoint() {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        int oldHeight = rgbFrameBitmap.getHeight();
+        int oldWidth = rgbFrameBitmap.getWidth();
+        Point[] points = polygonView.getPoints();
+        int old_x;
+        int old_y;
+        for (int i=0;i<4;i++) {
+            old_x = (int) (points[i].x/scale);
+            old_y = (int) (points[i].y/scale);
+            points[i].y = oldWidth-old_x;
+            points[i].x = oldHeight-old_y;
+        }
+        Point[] newPoints = new Point[]{points[2],points[3],points[0],points[1]};
+        rgbFrameBitmap = Bitmap.createBitmap(rgbFrameBitmap, 0, 0, rgbFrameBitmap.getWidth(), rgbFrameBitmap.getHeight(), matrix, true);
+        formSingleton.getForm().setOriginalBitmap(rgbFrameBitmap);
+        displayBitmap = setScalePoint(rgbFrameBitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
+        cropImage.setImageBitmap(displayBitmap);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) (displayBitmap.getWidth()), (int) (displayBitmap.getHeight()));
+        layoutParams.gravity = Gravity.CENTER;
+        polygonView.setLayoutParams(layoutParams);
+        polygonView.setCropPoints(getScalePoint(newPoints));
+    }
+
+    private Bitmap rotateImage(Bitmap source, int angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);

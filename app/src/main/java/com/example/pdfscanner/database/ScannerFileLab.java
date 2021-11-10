@@ -58,6 +58,23 @@ public class ScannerFileLab {
         return scannerFiles;
     }
 
+    public List<ScannerFile> searchScannerFiles(String title) {
+        List<ScannerFile> scannerFiles = new ArrayList<>();
+
+        ScannerFileCursorWrapper cursorWrapper = queryScannerFiles(FileTable.Cols.TITLE+" LIKE ?",new String[]{"%"+title+"%"});
+        try {
+            cursorWrapper.moveToFirst();
+            while (!cursorWrapper.isAfterLast()) {
+                scannerFiles.add(cursorWrapper.getScannerFile());
+                cursorWrapper.moveToNext();
+            }
+        } finally {
+            cursorWrapper.close();
+        }
+
+        return scannerFiles;
+    }
+
     public boolean checkTitle(String file_name) {
         ScannerFileCursorWrapper cursorWrapper = queryScannerFiles(FileTable.Cols.TITLE + "= ?", new String[]{file_name});
         if (cursorWrapper.getCount()==0) {

@@ -68,4 +68,13 @@ public class MainActivity extends AppCompatActivity {
             fm.beginTransaction().add(R.id.fragment_container,fragment).commit();
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (!(fragment instanceof IOnBackPressed) || !((IOnBackPressed) fragment).onBackPressed()) {
+            super.onBackPressed();
+        }
+    }
+
 }

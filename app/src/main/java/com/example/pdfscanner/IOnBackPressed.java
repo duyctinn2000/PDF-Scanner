@@ -1,2 +1,5 @@
-package com.example.pdfscanner;public interface IOnBackPressed {
+package com.example.pdfscanner;
+
+public interface IOnBackPressed {
+    boolean onBackPressed();
 }

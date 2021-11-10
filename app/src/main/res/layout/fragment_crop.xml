@@ -39,7 +39,7 @@
             android:layout_width="41dp"
             android:layout_height="41dp"
             android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="15dp"
             android:background="@drawable/ic_forward_foreground"/>
 
     </androidx.appcompat.widget.Toolbar>
@@ -84,10 +84,10 @@
         android:background="@color/edit">
 
         <Button
-            android:id="@+id/deleteButton"
+            android:id="@+id/rotateButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@drawable/ic_delete_foreground"
+            android:background="@drawable/ic_rotate_foreground"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="70dp"/>
@@ -114,15 +114,15 @@
             app:layout_constraintTop_toBottomOf="@+id/cropButton" />
 
         <TextView
-            android:id="@+id/deleteTextView"
+            android:id="@+id/rotateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
-            android:text="Delete"
+            android:text="Rotate"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/deleteButton"
-            app:layout_constraintStart_toStartOf="@+id/deleteButton" />
+            app:layout_constraintEnd_toEndOf="@+id/rotateButton"
+            app:layout_constraintStart_toStartOf="@+id/rotateButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

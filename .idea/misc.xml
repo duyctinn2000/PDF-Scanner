@@ -16,6 +16,7 @@
         <entry key="app/src/main/res/drawable/ic_point_foreground.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_rotate_background.xml" value="0.2722222222222222" />
         <entry key="app/src/main/res/drawable/ic_rotate_foreground.xml" value="0.2722222222222222" />
+        <entry key="app/src/main/res/drawable/ic_search_foreground.xml" value="0.19583333333333333" />
         <entry key="app/src/main/res/layout/activity_edit.xml" value="0.171875" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2746246634401579" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.31666666666666665" />
@@ -27,7 +28,7 @@
         <entry key="app/src/main/res/layout/fragment_empty.xml" value="0.2936003770848353" />
         <entry key="app/src/main/res/layout/fragment_file.xml" value="0.31666666666666665" />
         <entry key="app/src/main/res/layout/fragment_fileview.xml" value="0.1796875" />
-        <entry key="app/src/main/res/layout/fragment_main.xml" value="0.16189660676672754" />
+        <entry key="app/src/main/res/layout/fragment_main.xml" value="0.22405310922974064" />
         <entry key="app/src/main/res/layout/fragment_viewfile.xml" value="0.19093207587351335" />
         <entry key="app/src/main/res/layout/list_files.xml" value="0.2203125" />
         <entry key="app/src/main/res/menu/menu_crop.xml" value="0.4102381189667542" />

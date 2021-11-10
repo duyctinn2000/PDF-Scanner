@@ -48,8 +48,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class EditFragment extends Fragment {
-    private static final int CREATE_FILE = 3;
-    private Button rotateButton, filterButton, backButton, checkButton, adjustButton, saveButton, cancelButton;
+    private Button deleteButton, filterButton, backButton, checkButton, adjustButton, saveButton, cancelButton, deleteNoButton, deleteYesButton;
     private ImageView editImage, originalImage , grayImage, bwImage, smoothImage, magicImage;;
     private Bitmap originalBitmap,cropBitmap, grayBitmap, bwBitmap, smoothBitmap, magicBitmap;
     private Bitmap editBitmap;
@@ -60,6 +59,7 @@ public class EditFragment extends Fragment {
     private SeekBar contrastBar, brightBar;
     private Dialog checkDialog;
     private FormSingleton formSingleton;
+    private Dialog deleteDialog;
     private EditText save_filename;
     private RadioButton save_pdf, save_jpeg;
     private RadioGroup save_format;
@@ -88,7 +88,7 @@ public class EditFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_edit,container,false);
-        rotateButton = v.findViewById(R.id.rotateButton);
+        deleteButton = v.findViewById(R.id.deleteButton);
         filterButton = v.findViewById(R.id.filterButton);
         backButton = v.findViewById(R.id.edit_back);
         checkButton = v.findViewById(R.id.edit_check);
@@ -140,8 +140,31 @@ public class EditFragment extends Fragment {
         setSelectedFilter(originalText);
         editImage.setImageBitmap(editBitmap);
 
+        deleteDialog = new Dialog(getActivity());
+        deleteDialog.setContentView(R.layout.dialog_delete);
+        deleteDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        deleteDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        deleteDialog.setCancelable(false);
+        deleteNoButton = deleteDialog.findViewById(R.id.btn_delete_no);
+        deleteYesButton = deleteDialog.findViewById(R.id.btn_delete_yes);
+
         brightValue = 50;
         contrastValue = 50;
+
+        deleteNoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteDialog.dismiss();
+            }
+        });
+
+        deleteYesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(),MainActivity.class);
+                startActivity(intent);
+            }
+        });
 
         save_format.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -298,14 +321,12 @@ public class EditFragment extends Fragment {
             }
         });
 
-        rotateButton.setOnClickListener(new View.OnClickListener() {
+        deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editBitmap = rotateImage(editBitmap, 90);
-                editImage.setImageBitmap(editBitmap);
+                deleteDialog.show();
             }
         });
-
 
         adjustButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -435,12 +456,6 @@ public class EditFragment extends Fragment {
         bwText.setBackgroundColor(getResources().getColor(R.color.filter));
         smoothText.setBackgroundColor(getResources().getColor(R.color.filter));
         selectedText.setBackgroundColor(getResources().getColor(R.color.primary));
-    }
-
-    private Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
 }
