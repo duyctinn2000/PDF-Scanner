@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -42,10 +43,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class CropFragment extends Fragment {
+public class CropFragment extends Fragment implements IOnBackPressed{
     private static final String SOURCE_IMAGE = "crop_image";
     private String sourcePath;
-    private Button rotateButton, cropButton, backButton, forwardButton;
+    private Button rotateButton, cropButton, backButton, forwardButton, deleteNoButton, deleteYesButton;
     private ImageView cropImage;
     private Bitmap rgbFrameBitmap;
     private Bitmap displayBitmap;
@@ -61,6 +62,8 @@ public class CropFragment extends Fragment {
     private float scale_rotate;
     private float scale;
     private int rotate_time;
+    private Dialog deleteDialog;
+
 
     public static CropFragment newInstance(String imgPath) {
         Bundle args = new Bundle();
@@ -134,6 +137,28 @@ public class CropFragment extends Fragment {
         sourceFrame = v.findViewById(R.id.sourceFrame);
         cropTextView = v.findViewById(R.id.cropTextView);
 
+        deleteDialog = new Dialog(getActivity());
+        deleteDialog.setContentView(R.layout.dialog_delete);
+        deleteDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        deleteDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        deleteDialog.setCancelable(false);
+        deleteNoButton = deleteDialog.findViewById(R.id.btn_delete_no);
+        deleteYesButton = deleteDialog.findViewById(R.id.btn_delete_yes);
+
+        deleteNoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteDialog.dismiss();
+            }
+        });
+
+        deleteYesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(),MainActivity.class);
+                startActivity(intent);
+            }
+        });
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -373,5 +398,11 @@ public class CropFragment extends Fragment {
             rgbFrameBitmap.recycle();
             rgbFrameBitmap = null;
         }
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        deleteDialog.show();
+        return true;
     }
 }

@@ -68,6 +68,8 @@ public class EditFragment extends Fragment {
     private String format_type = "pdf";
     private String format_name;
     private ScannerFileLab scannerFileLab;
+    private boolean change_filter_check = true;
+
 
     public static EditFragment newInstance() {
         EditFragment fragment = new EditFragment();
@@ -83,6 +85,7 @@ public class EditFragment extends Fragment {
         originalBitmap = cropBitmap.copy(cropBitmap.getConfig(), false);
         filter = new Filter(originalBitmap);
     }
+
 
     @Nullable
     @Override
@@ -147,9 +150,10 @@ public class EditFragment extends Fragment {
         deleteDialog.setCancelable(false);
         deleteNoButton = deleteDialog.findViewById(R.id.btn_delete_no);
         deleteYesButton = deleteDialog.findViewById(R.id.btn_delete_yes);
-
+        change_filter_check = true;
         brightValue = 50;
         contrastValue = 50;
+
 
         deleteNoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -331,13 +335,16 @@ public class EditFragment extends Fragment {
         adjustButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adjustBitmap = editBitmap.copy(editBitmap.getConfig(), true);
-                contrastBar.setProgress(50);
-                brightBar.setProgress(50);
-                brightValue = 50;
-                contrastValue = 50;
-                contrastText.setText(String.valueOf(50));
-                brightText.setText(String.valueOf(50));
+                if (change_filter_check) {
+                    adjustBitmap = editBitmap.copy(editBitmap.getConfig(), true);
+                    contrastBar.setProgress(50);
+                    brightBar.setProgress(50);
+                    brightValue = 50;
+                    contrastValue = 50;
+                    contrastText.setText(String.valueOf(50));
+                    brightText.setText(String.valueOf(50));
+                    change_filter_check = false;
+                }
                 adjustText.setTextColor(getResources().getColor(R.color.primary));
                 filterText.setTextColor(getResources().getColor(R.color.white));
                 filterView.setVisibility(View.GONE);
@@ -348,10 +355,6 @@ public class EditFragment extends Fragment {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (adjustBitmap!=null) {
-                    adjustBitmap.recycle();
-                    adjustBitmap = null;
-                }
                 filterText.setTextColor(getResources().getColor(R.color.primary));
                 adjustText.setTextColor(getResources().getColor(R.color.white));
                 adjustView.setVisibility(View.GONE);
@@ -450,6 +453,11 @@ public class EditFragment extends Fragment {
     }
 
     private void setSelectedFilter(TextView selectedText) {
+        change_filter_check = true;
+        if (adjustBitmap!=null) {
+            adjustBitmap.recycle();
+            adjustBitmap = null;
+        }
         originalText.setBackgroundColor(getResources().getColor(R.color.filter));
         grayText.setBackgroundColor(getResources().getColor(R.color.filter));
         magicText.setBackgroundColor(getResources().getColor(R.color.filter));
