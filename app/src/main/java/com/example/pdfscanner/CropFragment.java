@@ -54,10 +54,13 @@ public class CropFragment extends Fragment {
     private FrameLayout sourceFrame;
     TextView cropTextView;
     private Point[] cropPoint;
+    private Point[] autoPoint;
     private boolean isAutoCrop = true;
     private FormSingleton formSingleton;
     private float scale_original;
     private float scale_rotate;
+    private float scale;
+    private int rotate_time;
 
     public static CropFragment newInstance(String imgPath) {
         Bundle args = new Bundle();
@@ -106,14 +109,13 @@ public class CropFragment extends Fragment {
 
             }
         }
-        formSingleton.getForm().setOriginalBitmap(rgbFrameBitmap);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crop,container,false);
-
+        rotate_time = 0;
         if (this.rgbFrameBitmap==null) {
             formSingleton = FormSingleton.get(getActivity());
             Bitmap tempBitmap = formSingleton.getForm().getOriginalBitmap();
@@ -166,8 +168,7 @@ public class CropFragment extends Fragment {
                 } else {
                     isAutoCrop = true;
                     cropTextView.setText("Full");
-                    cropPoint = FormDetector.detector(rgbFrameBitmap);
-                    polygonView.setCropPoints(getScalePoint(cropPoint));
+                    polygonView.setCropPoints(getScalePoint(autoPoint));
                 }
             }
         });
@@ -176,6 +177,9 @@ public class CropFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Point[] points = polygonView.getPoints();
+                Matrix matrix = new Matrix();
+                matrix.postRotate((rotate_time%4)*90);
+                formSingleton.getForm().setOriginalBitmap(Bitmap.createBitmap(rgbFrameBitmap, 0, 0, rgbFrameBitmap.getWidth(), rgbFrameBitmap.getHeight(), matrix, true));
                 rgbFrameBitmap = null;
                 if (points!=null) {
                     cropResult = perspectiveTransform(formSingleton.getForm().getOriginalBitmap(), points[0], points[1], points[2], points[3]);
@@ -214,12 +218,13 @@ public class CropFragment extends Fragment {
         this.cropPoint = formSingleton.getForm().getPoints();
         if (this.cropPoint==null) {
             this.cropPoint = FormDetector.detector(rgbFrameBitmap);
+            this.autoPoint = Arrays.copyOf(this.cropPoint,this.cropPoint.length);
         }
         polygonView.setCropPoints(getScalePoint(this.cropPoint));
         polygonView.setVisibility(View.VISIBLE);
     }
 
-    private Point[] getScalePoint(Point[] points, float scale) {
+    private Point[] getScalePoint(Point[] points) {
         Point point_0 = new Point(points[0].x*scale,points[0].y*scale);
         Point point_1 = new Point(points[1].x*scale,points[1].y*scale);
         Point point_2 = new Point(points[2].x*scale,points[2].y*scale);
@@ -236,9 +241,10 @@ public class CropFragment extends Fragment {
         scaleWidth = ((float) newWidth) / height;
         scaleHeight = ((float) newHeight) / width;
         scale_rotate = Math.min(scaleHeight,scaleWidth);
+        scale = scale_original;
         Matrix matrix = new Matrix();
         // RESIZE THE BIT MAP
-        matrix.postScale(scale_original, scale_original);
+        matrix.postScale(scale, scale);
 
         // "RECREATE" THE NEW BITMAP
         Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
@@ -270,7 +276,6 @@ public class CropFragment extends Fragment {
             resultWidth = 1024;
             resultHeight = (int) (resultHeight/resultScale);
         }
-        Log.i("131231",resultWidth+ " "+ resultHeight);
         Mat outputMat = new Mat(resultWidth, resultHeight, CvType.CV_8UC1);
 
         Point ocvPOut1 = new Point(0, 0);
@@ -294,25 +299,41 @@ public class CropFragment extends Fragment {
     }
 
     private void rotateImageAndPoint() {
+        rotate_time+=1;
         Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-        int oldHeight = rgbFrameBitmap.getHeight();
-        int oldWidth = rgbFrameBitmap.getWidth();
+        matrix.postRotate((rotate_time%4)*90);
+        int oldHeight;
+        if (scale == scale_rotate) {
+            oldHeight = rgbFrameBitmap.getWidth();
+        } else {
+            float scaleWidth = ((float) sourceFrame.getWidth()) / displayBitmap.getHeight();
+            float scaleHeight = ((float) sourceFrame.getHeight()) / displayBitmap.getHeight();
+            float display_scale = Math.min(scaleHeight,scaleWidth);
+            matrix.postScale(display_scale, display_scale);
+            oldHeight = rgbFrameBitmap.getHeight();
+        }
         Point[] points = polygonView.getPoints();
         int old_x;
         int old_y;
+        double temp_auto;
         for (int i=0;i<4;i++) {
             old_x = (int) (points[i].x/scale);
             old_y = (int) (points[i].y/scale);
-            points[i].y = oldWidth-old_x;
+            points[i].y = old_x;
             points[i].x = oldHeight-old_y;
+            temp_auto = autoPoint[i].y;
+            autoPoint[i].y = autoPoint[i].x;
+            autoPoint[i].x = oldHeight - temp_auto;
         }
-        Point[] newPoints = new Point[]{points[2],points[3],points[0],points[1]};
-        rgbFrameBitmap = Bitmap.createBitmap(rgbFrameBitmap, 0, 0, rgbFrameBitmap.getWidth(), rgbFrameBitmap.getHeight(), matrix, true);
-        formSingleton.getForm().setOriginalBitmap(rgbFrameBitmap);
-        displayBitmap = setScalePoint(rgbFrameBitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
-        cropImage.setImageBitmap(displayBitmap);
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) (displayBitmap.getWidth()), (int) (displayBitmap.getHeight()));
+        if (scale == scale_rotate) {
+            scale = scale_original;
+        } else {
+            scale = scale_rotate;
+        }
+        Point[] newPoints = new Point[]{points[1],points[0],points[3],points[2]};
+        Bitmap temp_displayBitmap = Bitmap.createBitmap(displayBitmap, 0, 0, displayBitmap.getWidth(), displayBitmap.getHeight(), matrix, true);
+        cropImage.setImageBitmap(temp_displayBitmap);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) (temp_displayBitmap.getWidth()), (int) (temp_displayBitmap.getHeight()));
         layoutParams.gravity = Gravity.CENTER;
         polygonView.setLayoutParams(layoutParams);
         polygonView.setCropPoints(getScalePoint(newPoints));
