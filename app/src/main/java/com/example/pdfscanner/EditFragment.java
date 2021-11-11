@@ -300,7 +300,9 @@ public class EditFragment extends Fragment {
                     scannerFile.setType(format_type);
                     scannerFileLab.addScannerFile(scannerFile);
                     Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
+                    getActivity().finish();
                 }
                 else {
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
