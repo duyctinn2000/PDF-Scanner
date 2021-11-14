@@ -260,6 +260,7 @@ public class EditFragment extends Fragment {
             public void onClick(View v) {
                 format_name = save_filename.getText().toString().trim();
                 if (!format_name.equals("") && scannerFileLab.checkTitle(format_name)) {
+                    checkDialog.dismiss();
                     if (format_type.equals("pdf")) {
                         PdfDocument pdfDocument = new PdfDocument();
                         PdfDocument.PageInfo pi = new PdfDocument.PageInfo.Builder(editBitmap.getWidth(), editBitmap.getHeight(), 1).create();
